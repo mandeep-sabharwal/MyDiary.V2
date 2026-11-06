@@ -308,4 +308,3 @@ Built by **Mandeep**.
 [![GitHub](https://img.shields.io/badge/GitHub-mandeep--sabharwal-181717?logo=github&logoColor=white)](https://github.com/mandeep-sabharwal)
 [![LeetCode](https://img.shields.io/badge/LeetCode-mandeeepsingh-FFA116?logo=leetcode&logoColor=white)](https://leetcode.com/u/mandeeepsingh/)
 
-No license has been chosen yet. Add a `LICENSE` file before sharing the code publicly.
