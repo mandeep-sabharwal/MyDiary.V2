@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "854155530299",
+    "project_id": "mydiary-4318f",
+    "storage_bucket": "mydiary-4318f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854155530299:android:e290c99f7d736c3e208c1e",
+        "android_client_info": {
+          "package_name": "com.mandeep.focus_garden"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854155530299-08cne096qp0qtapdt0cuomrhgsqh0t2h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mandeep.focus_garden",
+            "certificate_hash": "b964cf1d598b68b622918acbe627e269d127793e"
+          }
+        },
+        {
+          "client_id": "854155530299-8hhapt0umuqd3s01sn2f3nmq0ff46b4v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9P7KN1jGKgrwZ2co6Gt4k5BY1vu9pcjs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854155530299-8hhapt0umuqd3s01sn2f3nmq0ff46b4v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
