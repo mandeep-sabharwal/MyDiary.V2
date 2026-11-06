@@ -17,8 +17,6 @@ and keep everything encrypted on your phone, with optional end-to-end encrypted 
 
 <img src="docs/screenshots/design-overview.png" alt="Pawsie Diary design: Write, Calendar (dark), Stats, Settings and Sign in screens" />
 
-<sub>Design mockups the app was built from. Settings has since moved on a little (see below).</sub>
-
 </div>
 
 ---
