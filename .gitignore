@@ -17,3 +17,8 @@ local.properties
 *.jks
 *.keystore
 key.properties
+
+# Android signing credentials
+*.jks
+*.keystore
+key.properties
