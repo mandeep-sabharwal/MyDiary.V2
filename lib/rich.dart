@@ -215,6 +215,15 @@ class RichController extends TextEditingController {
     notifyListeners();
   }
 
+  /// Inserts plain text at the cursor (used for "Write about this" on the quote card).
+  void insertPlain(String s) {
+    final sel = value.selection;
+    final at = (sel.isValid ? sel.end : _text.length).clamp(0, _text.length);
+    _push(coalesce: false);
+    _replaceRange(at, at, s, cursor: at + s.length);
+    notifyListeners();
+  }
+
   /// Removes the [index]-th photo (and its placeholder) from the text.
   void removeImageAt(int index) {
     var seen = -1;

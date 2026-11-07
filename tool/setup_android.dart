@@ -47,15 +47,20 @@ void _patchManifest(File f, List<String> log) {
   const perms = [
     'android.permission.RECEIVE_BOOT_COMPLETED',
     'android.permission.USE_BIOMETRIC',
+    'android.permission.INTERNET',
     'android.permission.POST_NOTIFICATIONS',
     'android.permission.SCHEDULE_EXACT_ALARM',
   ];
   final add = StringBuffer();
   for (final p in perms) {
-    if (!s.contains('"$p"')) add.writeln('    <uses-permission android:name="$p"/>');
+    if (!s.contains('"$p"'))
+      add.writeln('    <uses-permission android:name="$p"/>');
   }
   if (add.isNotEmpty) {
-    s = s.replaceFirstMapped(RegExp(r'<manifest[^>]*>'), (m) => '${m.group(0)}\n$add');
+    s = s.replaceFirstMapped(
+      RegExp(r'<manifest[^>]*>'),
+      (m) => '${m.group(0)}\n$add',
+    );
     changed = true;
   }
 
@@ -79,7 +84,10 @@ void _patchManifest(File f, List<String> log) {
   // The encryption key lives in the phone's Keystore and cannot move to another
   // phone, so Android's cloud backup of the (encrypted) files would be unreadable.
   if (!RegExp(r'<application[^>]*android:allowBackup').hasMatch(s)) {
-    s = s.replaceFirst('<application', '<application\n        android:allowBackup="false"');
+    s = s.replaceFirst(
+      '<application',
+      '<application\n        android:allowBackup="false"',
+    );
     changed = true;
   }
   if (changed) f.writeAsStringSync(s);
@@ -97,7 +105,8 @@ void _patchMainActivity(Directory main, List<String> log) {
     if (!d.existsSync()) continue;
     for (final e in d.listSync(recursive: true)) {
       if (e is File &&
-          (e.path.endsWith('MainActivity.kt') || e.path.endsWith('MainActivity.java'))) {
+          (e.path.endsWith('MainActivity.kt') ||
+              e.path.endsWith('MainActivity.java'))) {
         found = e;
       }
     }
@@ -113,7 +122,9 @@ void _patchMainActivity(Directory main, List<String> log) {
   }
   s = s.replaceAll(RegExp(r'\bFlutterActivity\b'), 'FlutterFragmentActivity');
   found.writeAsStringSync(s);
-  log.add('MainActivity now extends FlutterFragmentActivity (needed for fingerprint unlock)');
+  log.add(
+    'MainActivity now extends FlutterFragmentActivity (needed for fingerprint unlock)',
+  );
 }
 
 void _patchStyles(Directory res, List<String> log) {
@@ -122,7 +133,9 @@ void _patchStyles(Directory res, List<String> log) {
     final f = File('${res.path}/$dir/styles.xml');
     if (!f.existsSync()) continue;
     var s = _read(f);
-    final re = RegExp(r'(<style name="LaunchTheme" parent=")@android:style/Theme\.[A-Za-z.]+(")');
+    final re = RegExp(
+      r'(<style name="LaunchTheme" parent=")@android:style/Theme\.[A-Za-z.]+(")',
+    );
     if (re.hasMatch(s)) {
       s = s.replaceFirstMapped(
         re,

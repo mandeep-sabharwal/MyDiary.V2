@@ -32,6 +32,7 @@ and keep everything encrypted on your phone, with optional end-to-end encrypted 
 - [Privacy and security](#privacy-and-security)
 - [How sync works](#how-sync-works)
 - [How reminders work](#how-reminders-work)
+- [REST API](#rest-api)
 - [Project structure](#project-structure)
 - [Tech stack](#tech-stack)
 - [Tests and quality](#tests-and-quality)
@@ -55,6 +56,7 @@ and keep everything encrypted on your phone, with optional end-to-end encrypted 
 - **Calendar** showing Mochi's mood face on every day you wrote, with entries listed below.
 - **Stats**: current streak, entries, words, average writing time, a "mood this week" chart and a mood mix bar.
 - **"One year ago today"** memories in your reminders.
+- **Thought of the day** on the Write screen, fetched from a public REST API (see [REST API](#rest-api)). Tap the pencil to start your entry from it.
 
 ### Playful rewards
 - **8 achievements** with progress bars (First page, 7-day streak, Night owl, 100 entries, Wordsmith,
@@ -162,6 +164,7 @@ Then open **Settings > Cloud backup > Turn on backup** and choose a backup passp
 | Passcode | App storage | Salted SHA-256 hash. It gates the app screen; the data itself is protected by the Keystore key. |
 | Cloud backup | Firebase Firestore | Encrypted **on the phone** with AES-256-GCM using a key derived from your passphrase (PBKDF2-HMAC-SHA256, 100,000 rounds). Firebase stores only ciphertext, a random salt, a passphrase check value, and entry ids with timestamps. |
 | Photos in the cloud | Not uploaded | Kept on the phone only (see [Known limits](#known-limits)). |
+| Thought of the day | One anonymous `GET` a day to a public API | No account, diary text or device id is sent. Switch it off in Settings and the app makes no such call. |
 | Android auto-backup | Switched off | The Keystore key cannot move to another phone, so a restored copy of the files would be unreadable. |
 
 **Important:** the diary is tied to the phone's Keystore. If you clear the app's data or uninstall, the local entries are gone.
@@ -197,6 +200,44 @@ With cloud backup on, sync is automatic:
 
 ---
 
+## REST API
+
+The **Thought of the day** card calls a public REST API, [DummyJSON](https://dummyjson.com/docs/quotes):
+
+```
+GET https://dummyjson.com/quotes/random
+-> {"id": 62, "quote": "If you want to lift yourself up, lift up someone else.", "author": "Booker T. Washington"}
+```
+
+- **One anonymous request a day.** Nothing about you or your diary is sent. The day's quote is cached, so reopening the app does not call the API again.
+- **Never empty.** Offline, or if the API is down, a built-in proverb is shown instead.
+- **Your choice.** Settings > **Thought of the day** switches the card (and the network call) off. **Another thought** (refresh) asks the API again.
+- **Write about this.** The pencil inserts the quote at your cursor so you can start an entry from it.
+- **Reusable client.** `lib/api.dart` is a small `ApiClient.getJson(...)` with timeouts, status checks and clear error messages, tested with a mock HTTP client in `test/widget_test.dart`.
+
+**How the call flows**
+
+```
+app start -> QuoteService.loadToday()
+               |- cached for today?  -> show it (no network)
+               '- otherwise          -> ApiClient.getJson(GET /quotes/random)
+                                          |- success -> parse Quote, cache it, show it
+                                          '- failure -> show a built-in proverb
+```
+
+**Using the client for another endpoint**
+
+```dart
+try {
+  final json = await ApiClient.getJson(Uri.https('example.com', '/api/thing'));
+  // parse json ...
+} on ApiException catch (e) {
+  // e.message is already friendly: "No internet connection.", "The request timed out.", ...
+}
+```
+
+---
+
 ## Project structure
 
 ```
@@ -220,6 +261,8 @@ lib/
   settings.dart        Appearance, theme, reminders, security, export, cloud, sign out
   brand_links.dart     GitHub and LeetCode link cards
   reminders.dart       Notification scheduling and styling
+  api.dart             Small reusable REST client (GET, status checks, JSON)
+  quotes.dart          Thought of the day: REST call, daily cache, offline fallback, card
   pdf_export.dart      PDF generation
   mochi.dart           Builds Mochi from SVG pieces
   mochi_art.dart       Generated artwork data (faces, accessories)
@@ -257,6 +300,7 @@ docs/screenshots/      README images
 | Notifications | `flutter_local_notifications`, `timezone` |
 | PDF | `pdf`, `printing` |
 | Online (optional) | `firebase_core`, `firebase_auth`, `cloud_firestore`, `google_sign_in` |
+| REST | `http` |
 | Links | `url_launcher` |
 
 ---
@@ -264,7 +308,7 @@ docs/screenshots/      README images
 ## Tests and quality
 
 ```bash
-flutter test      # word counting, streaks and badges, entry JSON round trip
+flutter test      # word counting, streaks and badges, entry JSON round trip, REST client and quote parsing
 flutter analyze   # should show no errors
 ```
 
@@ -297,6 +341,7 @@ There is no automated UI or on-device test suite yet.
 - Apple sign-in on Android needs the paid Apple Developer setup and opens a browser; Google uses the native account picker.
 - Inline photos use a newer Flutter text-field feature; the cursor can behave oddly right next to a photo on some devices.
 - Reminders use approximate alarms unless you allow exact timing, so they can arrive a few minutes late.
+- **Thought of the day** depends on a free third-party API (DummyJSON). If it is down or you are offline, a built-in proverb is shown instead.
 - The code is type-checked against Flutter 3.47 and unit-tested where noted, but has had limited testing across real devices.
 
 ---
@@ -307,5 +352,3 @@ Built by **Mandeep**.
 
 [![GitHub](https://img.shields.io/badge/GitHub-mandeep--sabharwal-181717?logo=github&logoColor=white)](https://github.com/mandeep-sabharwal)
 [![LeetCode](https://img.shields.io/badge/LeetCode-mandeeepsingh-FFA116?logo=leetcode&logoColor=white)](https://leetcode.com/u/mandeeepsingh/)
-
-No license has been chosen yet. Add a `LICENSE` file before sharing the code publicly.

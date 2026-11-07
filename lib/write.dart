@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'mochi.dart';
 import 'models.dart';
+import 'quotes.dart';
 import 'rich.dart';
 import 'secure_image.dart';
 import 'state.dart';
@@ -151,6 +152,13 @@ class _EntryFormState extends State<EntryForm> {
         ],
       ),
     );
+  }
+
+  /// "Write about this": starts (or continues) the entry from today's quote.
+  void _useQuote(Quote q) {
+    final who = q.author.isEmpty ? '' : ' - ${q.author}';
+    _body.insertPlain('\u201C${q.text}\u201D$who\n\n');
+    _bodyFocus.requestFocus();
   }
 
   /// Deletes photo files that are no longer part of the entry.
@@ -556,6 +564,7 @@ class _EntryFormState extends State<EntryForm> {
               ),
             ),
             const SizedBox(height: 12),
+            QuoteCard(onUse: _useQuote),
           ],
           Expanded(
             child: PawCard(

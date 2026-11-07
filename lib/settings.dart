@@ -352,6 +352,14 @@ class SettingsTab extends StatelessWidget {
                               ),
                             ),
                     ),
+                  row(
+                    'Thought of the day',
+                    PawBtn(
+                      accent: app.showQuote,
+                      onTap: () => app.setShowQuote(!app.showQuote),
+                      child: Text(app.showQuote ? 'On' : 'Off'),
+                    ),
+                  ),
                   row('Font size', PawBtn(onTap: app.cycleFont, child: Text(app.fontLabel))),
                   row(
                     'Passcode lock',

@@ -5,6 +5,7 @@ import 'biometric.dart';
 import 'cloud.dart';
 import 'home.dart';
 import 'lock.dart';
+import 'quotes.dart';
 import 'mochi.dart';
 import 'models.dart';
 import 'state.dart';
@@ -70,6 +71,7 @@ class _BootState extends State<_Boot> {
     setState(() => _ready = true);
     app.refreshReminders();
     cloud.autoSync(); // live + startup sync when cloud backup is on
+    if (app.showQuote) quotes.loadToday(); // today's thought (one tiny REST call a day)
   }
 
   @override

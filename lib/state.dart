@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'cloud.dart';
 import 'mochi_art.dart';
 import 'models.dart';
+import 'quotes.dart';
 import 'reminders.dart';
 import 'utils.dart';
 import 'vault.dart';
@@ -38,6 +39,7 @@ class AppState extends ChangeNotifier {
   int fontIdx = 1;
   bool biometricOn = false;
   String palette = 'pawsie';
+  bool showQuote = true;
   bool biometricAvailable = false;
   bool cloudBackup = false;
 
@@ -125,6 +127,7 @@ class AppState extends ChangeNotifier {
       fontIdx = ((j['font'] as int?) ?? 1).clamp(0, 2);
       biometricOn = (j['biometric'] as bool?) ?? false;
       palette = (j['palette'] as String?) ?? 'pawsie';
+      showQuote = (j['showQuote'] as bool?) ?? true;
       cloudBackup = (j['cloudBackup'] as bool?) ?? false;
       _passHash = j['passHash'] as String?;
       _passSalt = j['passSalt'] as String?;
@@ -205,6 +208,7 @@ class AppState extends ChangeNotifier {
       'font': fontIdx,
       'biometric': biometricOn,
       'palette': palette,
+      'showQuote': showQuote,
       'cloudBackup': cloudBackup,
       'passHash': _passHash,
       'passSalt': _passSalt,
@@ -312,6 +316,7 @@ class AppState extends ChangeNotifier {
     fontIdx = 1;
     biometricOn = false;
     palette = 'pawsie';
+    showQuote = true;
     cloudBackup = false;
     _photoCache.clear();
     _passHash = null;
@@ -466,6 +471,13 @@ class AppState extends ChangeNotifier {
     themeMode = m;
     _saveSettings();
     notifyListeners();
+  }
+
+  void setShowQuote(bool on) {
+    showQuote = on;
+    _saveSettings();
+    notifyListeners();
+    if (on) quotes.loadToday();
   }
 
   void setPalette(String id) {
