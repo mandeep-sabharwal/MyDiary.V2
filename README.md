@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="tool/android_res/mipmap-xxxhdpi/ic_launcher.png" width="96" alt="Pawsie Diary app icon" />
+<img src="docs/screenshots/icon.png" width="96" alt="Pawsie Diary app icon" />
 
 # Pawsie Diary
 
@@ -157,15 +157,15 @@ Then open **Settings > Cloud backup > Turn on backup** and choose a backup passp
 
 ## Privacy and security
 
-| What | Where it lives | How it is protected |
-| --- | --- | --- |
-| Entries and photos | App storage on the phone | AES-256-GCM. The random 256-bit key is stored in the Android Keystore via `flutter_secure_storage`, never in the app's own files. Large payloads are encrypted on a background isolate. |
-| Account password (on device) | App storage | Salted SHA-256 hash. The plain password is never stored. |
-| Passcode | App storage | Salted SHA-256 hash. It gates the app screen; the data itself is protected by the Keystore key. |
-| Cloud backup | Firebase Firestore | Encrypted **on the phone** with AES-256-GCM using a key derived from your passphrase (PBKDF2-HMAC-SHA256, 100,000 rounds). Firebase stores only ciphertext, a random salt, a passphrase check value, and entry ids with timestamps. |
-| Photos in the cloud | Not uploaded | Kept on the phone only (see [Known limits](#known-limits)). |
-| Thought of the day | One anonymous `GET` a day to a public API | No account, diary text or device id is sent. Switch it off in Settings and the app makes no such call. |
-| Android auto-backup | Switched off | The Keystore key cannot move to another phone, so a restored copy of the files would be unreadable. |
+| What                         | Where it lives                            | How it is protected                                                                                                                                                                                                                 |
+| ---------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entries and photos           | App storage on the phone                  | AES-256-GCM. The random 256-bit key is stored in the Android Keystore via `flutter_secure_storage`, never in the app's own files. Large payloads are encrypted on a background isolate.                                             |
+| Account password (on device) | App storage                               | Salted SHA-256 hash. The plain password is never stored.                                                                                                                                                                            |
+| Passcode                     | App storage                               | Salted SHA-256 hash. It gates the app screen; the data itself is protected by the Keystore key.                                                                                                                                     |
+| Cloud backup                 | Firebase Firestore                        | Encrypted **on the phone** with AES-256-GCM using a key derived from your passphrase (PBKDF2-HMAC-SHA256, 100,000 rounds). Firebase stores only ciphertext, a random salt, a passphrase check value, and entry ids with timestamps. |
+| Photos in the cloud          | Not uploaded                              | Kept on the phone only (see [Known limits](#known-limits)).                                                                                                                                                                         |
+| Thought of the day           | One anonymous `GET` a day to a public API | No account, diary text or device id is sent. Switch it off in Settings and the app makes no such call.                                                                                                                              |
+| Android auto-backup          | Switched off                              | The Keystore key cannot move to another phone, so a restored copy of the files would be unreadable.                                                                                                                                 |
 
 **Important:** the diary is tied to the phone's Keystore. If you clear the app's data or uninstall, the local entries are gone.
 Turn on cloud backup (and keep your passphrase safe) or export a PDF first. **If you forget the backup passphrase, the backup cannot be recovered**,
@@ -228,11 +228,13 @@ app start -> QuoteService.loadToday()
 **Using the client for another endpoint**
 
 ```dart
-try {
-  final json = await ApiClient.getJson(Uri.https('example.com', '/api/thing'));
-  // parse json ...
-} on ApiException catch (e) {
-  // e.message is already friendly: "No internet connection.", "The request timed out.", ...
+Future<void> loadThing() async {
+  try {
+    final json = await ApiClient.getJson(Uri.https('example.com', '/api/thing'));
+    // parse json ...
+  } on ApiException catch (e) {
+    // e.message is already friendly: "No internet connection.", "The request timed out.", ...
+  }
 }
 ```
 
@@ -291,17 +293,17 @@ docs/screenshots/      README images
 
 ## Tech stack
 
-| Area | Packages |
-| --- | --- |
-| UI and art | Flutter, `flutter_svg`, `google_fonts` (Quicksand) |
-| Storage | `shared_preferences`, `path_provider`, `image_picker` |
-| Encryption | `cryptography` (AES-GCM, PBKDF2), `flutter_secure_storage`, `crypto` |
-| Lock | `local_auth` |
-| Notifications | `flutter_local_notifications`, `timezone` |
-| PDF | `pdf`, `printing` |
+| Area              | Packages                                                              |
+| ----------------- | --------------------------------------------------------------------- |
+| UI and art        | Flutter, `flutter_svg`, `google_fonts` (Quicksand)                    |
+| Storage           | `shared_preferences`, `path_provider`, `image_picker`                 |
+| Encryption        | `cryptography` (AES-GCM, PBKDF2), `flutter_secure_storage`, `crypto`  |
+| Lock              | `local_auth`                                                          |
+| Notifications     | `flutter_local_notifications`, `timezone`                             |
+| PDF               | `pdf`, `printing`                                                     |
 | Online (optional) | `firebase_core`, `firebase_auth`, `cloud_firestore`, `google_sign_in` |
-| REST | `http` |
-| Links | `url_launcher` |
+| REST              | `http`                                                                |
+| Links             | `url_launcher`                                                        |
 
 ---
 
@@ -319,17 +321,17 @@ There is no automated UI or on-device test suite yet.
 
 ## Troubleshooting
 
-| Problem | Fix |
-| --- | --- |
-| Scheduled reminders never appear, though "show now" works | The manifest is missing the notification receivers. Run `dart tool/setup_android.dart`, then stop the app and run it again (not hot reload). Turn on **Exact timing**. Long-press **Daily reminder** for a status line. |
-| `flutter analyze` shows lots of errors from files you did not write | Old code or stray `.dart` files from another app are in the project. Delete them, and any loose `.dart` file next to `pubspec.yaml`. |
-| Red `_dependents.isEmpty` error screen | Usually a leftover after hot reload following a big change. Stop the app and run it fresh. |
-| "Could not open its secure storage" | Use an emulator image with Google Play, or a real phone. This can also appear if app data was restored onto a different phone. |
-| Google sign-in cancels right after you pick an account | The SHA-1 and SHA-256 of your build are missing in Firebase, or `google-services.json` is out of date. |
-| "serverClientId must be provided" | Set `kGoogleWebClientId` in `lib/cloud.dart`. |
-| "Sync failed" or permission denied | Create the Firestore database and apply the rules above. |
-| Diary empty after clearing app data | Sign in again and enter your backup passphrase when asked to restore. |
-| App feels slow on an emulator | Run with `flutter run --release`, or use a real phone. |
+| Problem                                                             | Fix                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scheduled reminders never appear, though "show now" works           | The manifest is missing the notification receivers. Run `dart tool/setup_android.dart`, then stop the app and run it again (not hot reload). Turn on **Exact timing**. Long-press **Daily reminder** for a status line. |
+| `flutter analyze` shows lots of errors from files you did not write | Old code or stray `.dart` files from another app are in the project. Delete them, and any loose `.dart` file next to `pubspec.yaml`.                                                                                    |
+| Red `_dependents.isEmpty` error screen                              | Usually a leftover after hot reload following a big change. Stop the app and run it fresh.                                                                                                                              |
+| "Could not open its secure storage"                                 | Use an emulator image with Google Play, or a real phone. This can also appear if app data was restored onto a different phone.                                                                                          |
+| Google sign-in cancels right after you pick an account              | The SHA-1 and SHA-256 of your build are missing in Firebase, or `google-services.json` is out of date.                                                                                                                  |
+| "serverClientId must be provided"                                   | Set `kGoogleWebClientId` in `lib/cloud.dart`.                                                                                                                                                                           |
+| "Sync failed" or permission denied                                  | Create the Firestore database and apply the rules above.                                                                                                                                                                |
+| Diary empty after clearing app data                                 | Sign in again and enter your backup passphrase when asked to restore.                                                                                                                                                   |
+| App feels slow on an emulator                                       | Run with `flutter run --release`, or use a real phone.                                                                                                                                                                  |
 
 ---
 
@@ -352,3 +354,4 @@ Built by **Mandeep**.
 
 [![GitHub](https://img.shields.io/badge/GitHub-mandeep--sabharwal-181717?logo=github&logoColor=white)](https://github.com/mandeep-sabharwal)
 [![LeetCode](https://img.shields.io/badge/LeetCode-mandeeepsingh-FFA116?logo=leetcode&logoColor=white)](https://leetcode.com/u/mandeeepsingh/)
+
